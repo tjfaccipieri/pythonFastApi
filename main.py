@@ -34,25 +34,25 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 # ! Begin of Posts session
 
-@app.post("/posts/", status_code=status.HTTP_201_CREATED)
+@app.post("/posts/", status_code=status.HTTP_201_CREATED, tags=['posts'])
 async def create_post(post: PostBase, db: db_dependency):
   db_post = models.Post(**post.model_dump())
   db.add(db_post)
   db.commit()
 
-@app.get('/posts/{post_id}', status_code=status.HTTP_200_OK)
+@app.get('/posts/{post_id}', status_code=status.HTTP_200_OK, tags=['posts'])
 async def read_post(post_id: int, db: db_dependency):
   post = db.query(models.Post).filter(models.Post.id == post_id).options(joinedload(models.Post.owner)).first()
   if post is None:
     raise HTTPException(status_code=404, detail="post not found")
   return post
 
-@app.get('/posts/', status_code=status.HTTP_200_OK)
+@app.get('/posts/', status_code=status.HTTP_200_OK, tags=['posts'])
 async def read_posts(db: db_dependency):
     posts = db.query(models.Post).options(joinedload(models.Post.owner)).all()
     return posts
 
-@app.delete('/posts/{post_id}', status_code=status.HTTP_200_OK)
+@app.delete('/posts/{post_id}', status_code=status.HTTP_200_OK, tags=['posts'])
 async def delete_post(post_id: int, db: db_dependency):
   post = db.query(models.Post).filter(models.Post.id == post_id).first()
   if post is None:
@@ -64,7 +64,7 @@ async def delete_post(post_id: int, db: db_dependency):
 
 # ? Begin of Users session
 
-@app.post('/users/', status_code=status.HTTP_201_CREATED)
+@app.post('/users/', status_code=status.HTTP_201_CREATED, tags=['users'])
 async def create_user(user: UserBase, db: db_dependency):
   db_user = models.User(**user.model_dump())
   hashed_pass = helpers.hash_passcode(db_user.password)
@@ -72,7 +72,7 @@ async def create_user(user: UserBase, db: db_dependency):
   db.add(db_user)
   db.commit()
 
-@app.put("/users/{user_id}", status_code=status.HTTP_200_OK)
+@app.put("/users/{user_id}", status_code=status.HTTP_200_OK, tags=['users'])
 async def update_user(user_id: int, db: db_dependency, user_data: dict):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
@@ -87,19 +87,19 @@ async def update_user(user_id: int, db: db_dependency, user_data: dict):
     db.commit()
     return db_user
 
-@app.get("/users/", status_code=status.HTTP_200_OK)
+@app.get("/users/", status_code=status.HTTP_200_OK, tags=['users'])
 async def all_user( db: db_dependency):
   user = db.query(models.User).options(joinedload(models.User.posts)).all()
   return user
 
-@app.get("/users/{user_id}", status_code=status.HTTP_200_OK)
+@app.get("/users/{user_id}", status_code=status.HTTP_200_OK, tags=['users'])
 async def read_user(user_id: int, db: db_dependency):
   user = db.query(models.User).filter(models.User.id == user_id).options(joinedload(models.User.posts)).first()
   if user is None:
     raise HTTPException(status_code=404, detail="user not found")
   return user
 
-@app.delete('/users/{user_id}', status_code=status.HTTP_200_OK)
+@app.delete('/users/{user_id}', status_code=status.HTTP_200_OK, tags=['users'])
 async def delete_user(user_id: int, db: db_dependency):
   user = db.query(models.User).filter(models.User.id == user_id).first()
   if user is None:
