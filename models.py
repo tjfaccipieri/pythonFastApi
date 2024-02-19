@@ -8,6 +8,7 @@ class User(Base):
   id = Column(Integer, primary_key=True, index=True)
   username = Column(String(50), unique=True)
   fullname = Column(String(100))
+  password = Column(String(100))
 
   posts = relationship("Post", back_populates="owner")
 
