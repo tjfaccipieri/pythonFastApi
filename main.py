@@ -40,6 +40,17 @@ async def create_post(post: PostBase, db: db_dependency):
   db.add(db_post)
   db.commit()
 
+@app.put("/posts/{post_id}", status_code=status.HTTP_200_OK, tags=['posts'])
+async def update_post(post_id: int, db: db_dependency, post_data: dict):
+  db_post = db.query(models.Post).filter(models.Post.id == post_id).first()
+  if db_post is None:
+    raise HTTPException(status_code=404, detail="Post not found")
+  
+  db.query(models.Post).filter(models.Post.id == post_id).update(post_data)
+  
+  db.commit()
+  return db_post
+
 @app.get('/posts/{post_id}', status_code=status.HTTP_200_OK, tags=['posts'])
 async def read_post(post_id: int, db: db_dependency):
   post = db.query(models.Post).filter(models.Post.id == post_id).options(joinedload(models.Post.owner)).first()
